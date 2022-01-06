@@ -13,7 +13,7 @@ import os
 CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 
 my_dag = DAG(
-    dag_id='EvaluationAirflow1',
+    dag_id='EvaluationAirflow5',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
     schedule_interval='* * * * *',
@@ -34,7 +34,7 @@ task1  = PythonOperator(
 task2 = PythonOperator(
     task_id='datas_to_dashboard',
     python_callable=transform_data_into_csv,
-    op_kwargs= 20,
+    op_kwargs= {'n_files':20},
     dag=my_dag
 )
 
@@ -74,7 +74,7 @@ def func_5(task_instance):
         list_ml[list_scores.index(score_max)],
         X,
         y,
-        '../clean_data/best_model.pickle'
+        '/app/clean_data/best_model.pickle'
     )
 
 task4p = PythonOperator(
@@ -98,8 +98,7 @@ task4ppp = PythonOperator(
 
 task5 = PythonOperator(
     task_id='best_model_finder',
-    python_callable=transform_data_into_csv,
-    op_kwargs={'filename': "fulldata.csv"},
+    python_callable=func_5,
     dag=my_dag
 )
 

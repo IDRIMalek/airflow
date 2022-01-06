@@ -8,10 +8,6 @@
 .bash_history
 .bashrc
 .python_history
-airflow/app/.gitignore copy
 airflow/app/dags/__pycache__/
-airflow/app/logs/dag_processor_manager/dag_processor_manager.log
-airflow/app/logs/scheduler/
-airflow/app/logs/EvaluationAirflow1
-
-
+airflow/app/logs/
+airflow/app/raw_files/2022-01-06 15*
