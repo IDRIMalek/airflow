@@ -9,6 +9,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from airflow.operators.python import ShortCircuitOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 import os
 
 X, y =prepare_data('/app/clean_data/fulldata.csv')
@@ -49,22 +50,30 @@ def func_5(task_instance):
     )
 
 
+with DAG(
+    dag_id='EvaluationAirflow10',
+    description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
+    tags=['Evaluation', 'datascientest'],
+    schedule_interval= '* * * * *',
+    default_args={
+        'owner': 'airflow',
+        'start_date': days_ago(0),
+    },
+    catchup=False
+) as firstdag:
 
-#my_dag = DAG(
-#    dag_id='EvaluationAirflow5',
-#    description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
-#    tags=['Evaluation', 'datascientest'],
-#    schedule_interval='* * * * *',
-#    default_args={
-#        'owner': 'airflow',
-#        'start_date': days_ago(0),
-#    },
-#    catchup=False
-#)
+    task1  = PythonOperator(
+        task_id='fetchdatas',
+        python_callable=recup_data,
+    )
 
+    verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_samples)
+
+    task1 >> verify 
+    
 
 with DAG(
-    dag_id='EvaluationAirflow8',
+    dag_id='EvaluationAirflow9',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
     schedule_interval= None,
@@ -75,12 +84,16 @@ with DAG(
     catchup=False
 ) as my_dag:
 
-    task1  = PythonOperator(
-        task_id='fetchdatas',
-        python_callable=recup_data,
+    child_task1 = ExternalTaskSensor(
+        task_id="child_task1",
+        external_dag_id=firstdag.dag_id,
+        external_task_id=task1.task_id,
+        timeout=60,
+        allowed_states=['running'],
+        failed_states=['failed', 'skipped'],
+        mode="reschedule",
     )
 
-    verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_samples)
 
     task2 = PythonOperator(
         task_id='datas_to_dashboard',
@@ -117,7 +130,8 @@ with DAG(
         python_callable=func_5,
     )
 
-    task1 >> verify >> [task2, task3]
+
+    child_task1 >> [task2, task3]
     task3 >> [task4p, task4pp, task4ppp] 
     [task4p, task4pp, task4ppp]  >> task5
 

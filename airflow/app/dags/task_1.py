@@ -19,21 +19,19 @@ def recup_data():
     filename = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')+'.json'
 
     liste=[]
-    while True:
-        for n, city in enumerate(city_db):
-            # requête des données météo
-            r = requests.get('https://api.openweathermap.org/data/2.5/weather',
-            params= {
-            'q': city,
-            'appid': 'fc56ae115f07d271b2c9808ce644e091'
-                }
-            )
-            # Remplissage du fichier avec les données météos récoltées
-            liste.append(r.json())
+    for n, city in enumerate(city_db):
+        # requête des données météo
+        r = requests.get('https://api.openweathermap.org/data/2.5/weather',
+        params= {
+        'q': city,
+        'appid': 'fc56ae115f07d271b2c9808ce644e091'
+            }
+        )
+        # Remplissage du fichier avec les données météos récoltées
+        liste.append(r.json())
 
-        with open(filename, 'a') as file:
-            json.dump(liste, file)
-        time.spleep(6)
+    with open(filename, 'a') as file:
+        json.dump(liste, file)
     
         
     return r.status_code
@@ -41,6 +39,6 @@ def recup_data():
 def enough_samples():
     parent_folder = "/app/raw_files"
     files = sorted(os.listdir(parent_folder), reverse=True)
-    if n_files>30:
+    if len(files)>30:
         return True
     return False
