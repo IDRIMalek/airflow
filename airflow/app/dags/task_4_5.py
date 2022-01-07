@@ -4,6 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from joblib import dump
+from task_2_3 import *
 
 def func_4p(task_instance):
     #Score pour LinearRegression

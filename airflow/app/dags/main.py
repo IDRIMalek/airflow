@@ -19,7 +19,11 @@ with DAG(
         'owner': 'airflow',
         'start_date': days_ago(0),
     },
-    catchup=False
+    catchup=False, 
+    doc_md="""# Documented DAG
+This `DAG` is just a evaluation purpose.
+ 
+"""
 ) as my_dag:
 
     task1  = PythonOperator(
