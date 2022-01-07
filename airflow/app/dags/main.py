@@ -10,41 +10,6 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 import os
 
-CUR_DIR = os.path.abspath(os.path.dirname(__file__))
-
-my_dag = DAG(
-    dag_id='EvaluationAirflow5',
-    description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
-    tags=['Evaluation', 'datascientest'],
-    schedule_interval='* * * * *',
-    default_args={
-        'owner': 'airflow',
-        'start_date': days_ago(0),
-    },
-    catchup=False
-)
-
-
-task1  = PythonOperator(
-    task_id='fetchdata',
-    python_callable=recup_data,
-    dag=my_dag
-)
-
-task2 = PythonOperator(
-    task_id='datas_to_dashboard',
-    python_callable=transform_data_into_csv,
-    op_kwargs= {'n_files':20},
-    dag=my_dag
-)
-
-task3 = PythonOperator(
-    task_id='datas_to_ML',
-    python_callable=transform_data_into_csv,
-    op_kwargs={'filename': "fulldata.csv"},
-    dag=my_dag
-)
-
 X, y =prepare_data('/app/clean_data/fulldata.csv')
 
 def func_4p(task_instance):
@@ -76,6 +41,42 @@ def func_5(task_instance):
         y,
         '/app/clean_data/best_model.pickle'
     )
+
+my_dag = DAG(
+    dag_id='EvaluationAirflow5',
+    description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
+    tags=['Evaluation', 'datascientest'],
+    schedule_interval='* * * * *',
+    default_args={
+        'owner': 'airflow',
+        'start_date': days_ago(0),
+    },
+    catchup=False
+)
+
+
+task1  = PythonOperator(
+    task_id='fetchdatas',
+    python_callable=recup_data,
+    dag=my_dag
+)
+
+task2 = PythonOperator(
+    task_id='datas_to_dashboard',
+    python_callable=transform_data_into_csv,
+    op_kwargs= {'n_files':20},
+    provide_context=True,
+    trigger_rule=TriggerRule.ONE_SUCCESS,
+    dag=my_dag
+)
+
+task3 = PythonOperator(
+    task_id='datas_to_ML',
+    python_callable=transform_data_into_csv,
+    op_kwargs={'filename': "fulldata.csv"},
+    provide_context=True,
+    dag=my_dag
+)
 
 task4p = PythonOperator(
     task_id="LinearRegression",

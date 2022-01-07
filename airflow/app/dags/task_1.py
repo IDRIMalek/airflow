@@ -32,6 +32,7 @@ def recup_data():
 
     with open(filename, 'a') as file:
         json.dump(liste, file)
+    
         
     return r.status_code
 
