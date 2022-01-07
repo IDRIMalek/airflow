@@ -27,3 +27,7 @@ docker-compose up airflow-init
 
 # starting docker-compose
 docker-compose up -d
+
+
+git config --global user.email "idri.malek@gmail.com"
+git config --global user.name "IDRIMalek"
