@@ -1,8 +1,8 @@
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
-from task_1 import recup_data
-from task_2_3 import transform_data_into_csv
+from task_1 import *
+from task_2_3 import *
 from task_4_5 import *
 from airflow.operators.subdag import SubDagOperator
 from sklearn.linear_model import LinearRegression
@@ -48,12 +48,7 @@ def func_5(task_instance):
         '/app/clean_data/best_model.pickle'
     )
 
-def enough_samples():
-    parent_folder = "/app/raw_files"
-    files = sorted(os.listdir(parent_folder), reverse=True)
-    if n_files>30:
-        return True
-    return False
+
 
 #my_dag = DAG(
 #    dag_id='EvaluationAirflow5',
@@ -69,10 +64,10 @@ def enough_samples():
 
 
 with DAG(
-    dag_id='EvaluationAirflow7',
+    dag_id='EvaluationAirflow8',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
-    schedule_interval='* * * * *',
+    schedule_interval= None,
     default_args={
         'owner': 'airflow',
         'start_date': days_ago(0),
