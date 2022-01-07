@@ -48,6 +48,13 @@ def func_5(task_instance):
         '/app/clean_data/best_model.pickle'
     )
 
+def enough_samples():
+    parent_folder = "/app/raw_files"
+    files = sorted(os.listdir(parent_folder), reverse=True)
+    if n_files>30:
+        return True
+    return False
+
 #my_dag = DAG(
 #    dag_id='EvaluationAirflow5',
 #    description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
@@ -60,15 +67,9 @@ def func_5(task_instance):
 #    catchup=False
 #)
 
-def enough_samples():
-    parent_folder = "/app/raw_files"
-    files = sorted(os.listdir(parent_folder), reverse=True)
-    if n_files>30:
-        return True
-    return False
 
 with DAG(
-    dag_id='EvaluationAirflow6',
+    dag_id='EvaluationAirflow7',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
     schedule_interval='* * * * *',
@@ -82,7 +83,6 @@ with DAG(
     task1  = PythonOperator(
         task_id='fetchdatas',
         python_callable=recup_data,
-        dag=my_dag
     )
 
     verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_samples)
@@ -92,7 +92,6 @@ with DAG(
         python_callable=transform_data_into_csv,
         op_kwargs= {'n_files':20},
         provide_context=True,
-        dag=my_dag
     )
 
     task3 = PythonOperator(
@@ -100,32 +99,27 @@ with DAG(
         python_callable=transform_data_into_csv,
         op_kwargs={'filename': "fulldata.csv"},
         provide_context=True,
-        dag=my_dag
     )
 
     task4p = PythonOperator(
         task_id="LinearRegression",
         python_callable=func_4p,
-        dag=my_dag
     )
 
     task4pp = PythonOperator(
         task_id="DecisionTreeRegressor",
         python_callable=func_4pp,
-        dag=my_dag
     )
 
     task4ppp = PythonOperator(
         task_id="RandomForestRegressor",
         python_callable=func_4ppp,
-        dag=my_dag
     )
 
 
     task5 = PythonOperator(
         task_id='best_model_finder',
         python_callable=func_5,
-        dag=my_dag
     )
 
     task1 >> verify >> [task2, task3]
