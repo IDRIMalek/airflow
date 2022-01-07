@@ -78,7 +78,10 @@ def transform_data_into_csv(n_files=None, filename='data.csv'):
     df.to_csv(os.path.join('/app/clean_data', filename), index=False)
     
     if filename=='fulldata.csv':
+        global X
+        global y
         X, y =prepare_data('/app/clean_data/fulldata.csv')
-        Variable.set(key="X", value=X)
-        Variable.set(key="y", value=y)
+
+        #X.to_csv(os.path.join('/app/clean_data', 'X.csv'), index=False)
+        #y.to_csv(os.path.join('/app/clean_data', 'y.csv'), index=False)
 

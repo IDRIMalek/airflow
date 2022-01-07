@@ -3,15 +3,17 @@ from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-from airflow.models import Variable
 from joblib import dump
 
 
+#def Xydatas():
+#    X=pd.read_csv(os.path.join('/app/clean_data', 'X.csv'))
+#    y=pd.read_csv(os.path.join('/app/clean_data', 'y.csv'))
+#    return X, y
+
 def func_4p(task_instance):
     #Score pour LinearRegression
-    #X, y =prepare_data('/app/clean_data/fulldata.csv')
-    X = Variable.get(key="X")
-    y = Variable.get(key="y")
+    #X, y = Xydatas()
     score_lr = compute_model_score(LinearRegression(), X, y)
     task_instance.xcom_push(key='model_accuracy', value=score_lr)
 
@@ -19,8 +21,6 @@ def func_4p(task_instance):
 def func_4pp(task_instance):
     #Score pour DecisionTreeRegressor
     #X, y =prepare_data('/app/clean_data/fulldata.csv')
-    X = Variable.get(key="X")
-    y = Variable.get(key="y")
     score_dt = compute_model_score(DecisionTreeRegressor(), X, y)
     task_instance.xcom_push(key='model_accuracy', value=score_dt)
 
@@ -28,16 +28,12 @@ def func_4pp(task_instance):
 def func_4ppp(task_instance):
     #Score pour RandomForestRegressor
     #X, y =prepare_data('/app/clean_data/fulldata.csv')
-    X = Variable.get(key="X")
-    y = Variable.get(key="y")
     score_rfr = compute_model_score(RandomForestRegressor(), X, y)
     task_instance.xcom_push(key='model_accuracy', value=score_rfr)
 
 def func_5(task_instance):
     #X, y =prepare_data('/app/clean_data/fulldata.csv')
     #Lise des scores des model_accuracy
-    X = Variable.get(key="X")
-    y = Variable.get(key="y")
     list_scores=task_instance.xcom_pull(
     key="model_accuracy",
     task_ids=["LinearRegression", "DecisionTreeRegressor", "RandomForestRegressor"]
