@@ -73,7 +73,7 @@ with DAG(
 
 
 with DAG(
-    dag_id='EvaluationAirflow11',
+    dag_id='EvaluationAirflow11.2',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
     schedule_interval= None,
@@ -89,9 +89,9 @@ with DAG(
         external_dag_id=firstdag.dag_id,
         external_task_id=task1.task_id,
         timeout=60,
-        allowed_states=['running'],
+        allowed_states=['success'],
         failed_states=['failed', 'skipped'],
-        #mode="reschedule",
+        mode="reschedule",
     )
 
 
