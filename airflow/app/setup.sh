@@ -1,4 +1,9 @@
 #!/bin/bash
+
+
+git config --global user.email "idri.malek@gmail.com"
+git config --global user.name "IDRIMalek"
+
 # shutting down previous containers
 docker-compose down 
 
@@ -28,6 +33,3 @@ docker-compose up airflow-init
 # starting docker-compose
 docker-compose up -d
 
-
-git config --global user.email "idri.malek@gmail.com"
-git config --global user.name "IDRIMalek"

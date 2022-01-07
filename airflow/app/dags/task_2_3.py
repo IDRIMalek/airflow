@@ -3,6 +3,9 @@ import json
 import pandas as pd
 from airflow.models import Variable
 
+global X
+global y
+
 def prepare_data(path_to_data='/app/clean_data/fulldata.csv'):
     # reading data
     df = pd.read_csv(path_to_data)
@@ -78,8 +81,7 @@ def transform_data_into_csv(n_files=None, filename='data.csv'):
     df.to_csv(os.path.join('/app/clean_data', filename), index=False)
     
     if filename=='fulldata.csv':
-        global X
-        global y
+
         X, y =prepare_data('/app/clean_data/fulldata.csv')
 
         #X.to_csv(os.path.join('/app/clean_data', 'X.csv'), index=False)
