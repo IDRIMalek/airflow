@@ -8,6 +8,7 @@ from airflow.operators.subdag import SubDagOperator
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+from airflow.operators.python import ShortCircuitOperator
 import os
 
 X, y =prepare_data('/app/clean_data/fulldata.csv')
@@ -84,14 +85,13 @@ with DAG(
         dag=my_dag
     )
 
-    verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_sample)
+    verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_samples)
 
     task2 = PythonOperator(
         task_id='datas_to_dashboard',
         python_callable=transform_data_into_csv,
         op_kwargs= {'n_files':20},
         provide_context=True,
-        trigger_rule=TriggerRule.ONE_SUCCESS,
         dag=my_dag
     )
 
