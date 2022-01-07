@@ -8,52 +8,13 @@ from airflow.operators.subdag import SubDagOperator
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-from airflow.operators.python import ShortCircuitOperator
-from airflow.sensors.external_task_sensor import ExternalTaskSensor
 import os
 
-X, y =prepare_data('/app/clean_data/fulldata.csv')
-
-def func_4p(task_instance):
-    #Score pour LinearRegression
-    score_lr = compute_model_score(LinearRegression(), X, y)
-    task_instance.xcom_push(key='model_accuracy', value=score_lr)
-
-
-def func_4pp(task_instance):
-    #Score pour DecisionTreeRegressor
-    score_dt = compute_model_score(DecisionTreeRegressor(), X, y)
-    task_instance.xcom_push(key='model_accuracy', value=score_dt)
-
-
-def func_4ppp(task_instance):
-    #Score pour RandomForestRegressor
-    score_rfr = compute_model_score(RandomForestRegressor(), X, y)
-    task_instance.xcom_push(key='model_accuracy', value=score_rfr)
-
-def func_5(task_instance):
-    #Lise des scores des model_accuracy
-    list_scores=task_instance.xcom_pull(
-    key="model_accuracy",
-    task_ids=["LinearRegression", "DecisionTreeRegressor", "RandomForestRegressor"]
-    )
-    #Selection du meilleur model accuracy
-    score_max=max(list_scores)
-    print('score_max =>',score_max)
-    list_ml=[LinearRegression(),DecisionTreeRegressor(),RandomForestRegressor()]
-    #Reentrainnement du model et sauvegarde de ce model dans clean_data/best_model.pickle
-    train_and_save_model(
-        list_ml[list_scores.index(score_max)],
-        X,
-        y,
-        '/app/clean_data/best_model.pickle'
-    )
-
 with DAG(
-    dag_id='EvaluationAirflow12',
+    dag_id='EvaluationAirflow14',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
-    schedule_interval= None,
+    schedule_interval= '* * * * *',
     default_args={
         'owner': 'airflow',
         'start_date': days_ago(0),

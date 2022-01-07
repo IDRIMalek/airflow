@@ -36,9 +36,3 @@ def recup_data():
         
     return r.status_code
 
-def enough_samples():
-    parent_folder = "/app/raw_files"
-    files = sorted(os.listdir(parent_folder), reverse=True)
-    if len(files)>30:
-        return True
-    return False

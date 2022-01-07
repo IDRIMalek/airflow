@@ -3,8 +3,56 @@ from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+from airflow.models import Variable
 from joblib import dump
 
+
+def func_4p(task_instance):
+    #Score pour LinearRegression
+    #X, y =prepare_data('/app/clean_data/fulldata.csv')
+    X = Variable.get(key="X")
+    y = Variable.get(key="y")
+    score_lr = compute_model_score(LinearRegression(), X, y)
+    task_instance.xcom_push(key='model_accuracy', value=score_lr)
+
+
+def func_4pp(task_instance):
+    #Score pour DecisionTreeRegressor
+    #X, y =prepare_data('/app/clean_data/fulldata.csv')
+    X = Variable.get(key="X")
+    y = Variable.get(key="y")
+    score_dt = compute_model_score(DecisionTreeRegressor(), X, y)
+    task_instance.xcom_push(key='model_accuracy', value=score_dt)
+
+
+def func_4ppp(task_instance):
+    #Score pour RandomForestRegressor
+    #X, y =prepare_data('/app/clean_data/fulldata.csv')
+    X = Variable.get(key="X")
+    y = Variable.get(key="y")
+    score_rfr = compute_model_score(RandomForestRegressor(), X, y)
+    task_instance.xcom_push(key='model_accuracy', value=score_rfr)
+
+def func_5(task_instance):
+    #X, y =prepare_data('/app/clean_data/fulldata.csv')
+    #Lise des scores des model_accuracy
+    X = Variable.get(key="X")
+    y = Variable.get(key="y")
+    list_scores=task_instance.xcom_pull(
+    key="model_accuracy",
+    task_ids=["LinearRegression", "DecisionTreeRegressor", "RandomForestRegressor"]
+    )
+    #Selection du meilleur model accuracy
+    score_max=max(list_scores)
+    print('score_max =>',score_max)
+    list_ml=[LinearRegression(),DecisionTreeRegressor(),RandomForestRegressor()]
+    #Reentrainnement du model et sauvegarde de ce model dans clean_data/best_model.pickle
+    train_and_save_model(
+        list_ml[list_scores.index(score_max)],
+        X,
+        y,
+        '/app/clean_data/best_model.pickle'
+    )
 
 def compute_model_score(model, X, y):
     # computing cross val
@@ -27,48 +75,6 @@ def train_and_save_model(model, X, y, path_to_model='/app/clean_data/model.pckl'
     print(str(model), 'saved at ', path_to_model)
     dump(model, path_to_model)
 
-
-def prepare_data(path_to_data='/app/clean_data/fulldata.csv'):
-    # reading data
-    df = pd.read_csv(path_to_data)
-    # ordering data according to city and date
-    df = df.sort_values(['city', 'date'], ascending=True)
-
-    dfs = []
-
-    for c in df['city'].unique():
-        df_temp = df[df['city'] == c]
-
-        # creating target
-        df_temp.loc[:, 'target'] = df_temp['temperature'].shift(1)
-
-        # creating features
-        for i in range(1, 10):
-            df_temp.loc[:, 'temp_m-{}'.format(i)
-                        ] = df_temp['temperature'].shift(-i)
-
-        # deleting null values
-        df_temp = df_temp.dropna()
-
-        dfs.append(df_temp)
-
-    # concatenating datasets
-    df_final = pd.concat(
-        dfs,
-        axis=0,
-        ignore_index=False
-    )
-
-    # deleting date variable
-    df_final = df_final.drop(['date'], axis=1)
-
-    # creating dummies for city variable
-    df_final = pd.get_dummies(df_final)
-
-    features = df_final.drop(['target'], axis=1)
-    target = df_final['target']
-
-    return features, target
 
 
 
