@@ -70,10 +70,10 @@ with DAG(
     verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_samples)
 
     task1 >> verify 
-    
+
 
 with DAG(
-    dag_id='EvaluationAirflow9',
+    dag_id='EvaluationAirflow11',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
     schedule_interval= None,
@@ -91,7 +91,7 @@ with DAG(
         timeout=60,
         allowed_states=['running'],
         failed_states=['failed', 'skipped'],
-        mode="reschedule",
+        #mode="reschedule",
     )
 
 
