@@ -49,31 +49,8 @@ def func_5(task_instance):
         '/app/clean_data/best_model.pickle'
     )
 
-
 with DAG(
-    dag_id='EvaluationAirflow10',
-    description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
-    tags=['Evaluation', 'datascientest'],
-    schedule_interval= '* * * * *',
-    default_args={
-        'owner': 'airflow',
-        'start_date': days_ago(0),
-    },
-    catchup=False
-) as firstdag:
-
-    task1  = PythonOperator(
-        task_id='fetchdatas',
-        python_callable=recup_data,
-    )
-
-    verify = ShortCircuitOperator(task_id='enough_samples', python_callable=enough_samples)
-
-    task1 >> verify 
-
-
-with DAG(
-    dag_id='EvaluationAirflow11.2',
+    dag_id='EvaluationAirflow12',
     description='EvaluationAirflow : featching data from OpenWeatherMap api, ',
     tags=['Evaluation', 'datascientest'],
     schedule_interval= None,
@@ -84,16 +61,10 @@ with DAG(
     catchup=False
 ) as my_dag:
 
-    child_task1 = ExternalTaskSensor(
-        task_id="child_task1",
-        external_dag_id=firstdag.dag_id,
-        external_task_id=task1.task_id,
-        timeout=60,
-        allowed_states=['success'],
-        failed_states=['failed', 'skipped'],
-        mode="reschedule",
+    task1  = PythonOperator(
+        task_id='fetchdatas',
+        python_callable=recup_data,
     )
-
 
     task2 = PythonOperator(
         task_id='datas_to_dashboard',
@@ -131,7 +102,7 @@ with DAG(
     )
 
 
-    child_task1 >> [task2, task3]
+    task1 >> [task2, task3]
     task3 >> [task4p, task4pp, task4ppp] 
     [task4p, task4pp, task4ppp]  >> task5
 
